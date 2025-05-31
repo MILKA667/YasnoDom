@@ -144,8 +144,12 @@ public class ForegroundService extends Service implements LocationListener {
 
         if (!isHomeNow && wasHome) {
             // Пользователь только что вышел из дома
-            sendNotification("Вы вышли из дома", "Вы находитесь на расстоянии " + (int) distance + " метров от дома");
             Log.d(TAG, "Отправлено уведомление: пользователь вышел из дома");
+            if(sharedPreferences.getBoolean("light",false)){
+                sendNotification("Свет","Вы забыли выключить свет, мы сделали это за вас!");
+                editor.putBoolean("light",false);
+                editor.apply();
+            }
         }
 
         editor.putBoolean("user_is_home", isHomeNow);

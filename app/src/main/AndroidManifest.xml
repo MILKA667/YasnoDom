@@ -20,14 +20,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.YasnoDom"
         tools:targetApi="31">
+        <activity
+            android:name=".profile_activity"
+            android:exported="false" />
 
         <service
             android:name=".ForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location" />
-
-        <!-- Ваши активности -->
+            android:foregroundServiceType="location" /> <!-- Ваши активности -->
         <activity
             android:name=".ButtonScreen"
             android:exported="false" />
@@ -39,8 +40,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

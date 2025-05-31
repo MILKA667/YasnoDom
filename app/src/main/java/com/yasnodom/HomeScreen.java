@@ -51,13 +51,11 @@ public class HomeScreen extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         TextView user_home_text = findViewById(R.id.textView);
-        TextView distance_text = findViewById(R.id.textView3);
         if(pref.getBoolean("user_is_home", true)) {
             user_home_text.setText("Вы дома");
         } else {
             user_home_text.setText("Вы не дома");
         }
-        distance_text.setText(String.valueOf(pref.getFloat("distance",0.0F)));
 
     }
 
@@ -88,6 +86,10 @@ public class HomeScreen extends AppCompatActivity {
 
     public void GoToButtonScreen(View view) {
         Intent intent = new Intent(this, ButtonScreen.class);
+        startActivity(intent);
+    }
+    public void go_to_profile(View view){
+        Intent intent = new Intent(this, profile_activity.class);
         startActivity(intent);
     }
 }
