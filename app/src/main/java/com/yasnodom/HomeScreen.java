@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.Locale;
-
+ ""
 public class HomeScreen extends AppCompatActivity {
     private TextToSpeech textToSpeech;
     private SharedPreferences pref;
