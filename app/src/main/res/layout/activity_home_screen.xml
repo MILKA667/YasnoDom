@@ -8,18 +8,21 @@
     tools:context=".HomeScreen"
     android:background="#FFFFFF">
 
+    <!-- Профиль (кнопка) -->
     <ImageButton
         android:id="@+id/imageButton4"
-        android:layout_width="53dp"
-        android:layout_height="94dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="48dp"
+        android:adjustViewBounds="true"
         android:background="@null"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:onClick="go_to_profile"
         android:src="@drawable/my_profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Текстовое поле (оставлено без изменений) -->
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -31,33 +34,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Кнопка датчика -->
     <ImageButton
         android:id="@+id/imageButton"
-        android:layout_width="87dp"
-        android:layout_height="57dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
         android:layout_marginBottom="36dp"
+        android:adjustViewBounds="true"
         android:background="@null"
         android:onClick="GoToButtonScreen"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:src="@drawable/my_datch"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Левое изображение -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginBottom="332dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/my_left" />
 
+    <!-- Правое изображение -->
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/myright" />
