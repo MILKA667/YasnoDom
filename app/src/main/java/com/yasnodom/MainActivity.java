@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor edit;
     private LocationManager locationManager;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
+
+        // Проверка и запрос разрешения на уведомления для Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkNotificationPermission();
+        }
+    }
+
+    // Новый метод для проверки разрешения на уведомления
+    private void checkNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    NOTIFICATION_PERMISSION_REQUEST_CODE);
+        }
     }
 
     public void authorization(View view) {
@@ -98,10 +115,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void proceedToHomeScreen(String userName) {
-        edit.putBoolean("auth", true);
-        edit.putString("userName", userName);
-        edit.apply();
-
         Intent intent = new Intent(this, HomeScreen.class);
         startActivity(intent);
         finish();

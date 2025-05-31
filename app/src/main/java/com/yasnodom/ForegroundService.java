@@ -20,6 +20,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.concurrent.Executors;
@@ -48,19 +49,10 @@ public class ForegroundService extends Service implements LocationListener {
         notificationManager = getSystemService(NotificationManager.class);
 
         createNotificationChannel();
-        startForegroundWithNotification();
         startLocationTracking();
     }
 
-    private void startForegroundWithNotification() {
-        Notification notification = buildNotification("Сервис геолокации активен");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
-        } else {
-            startForeground(NOTIFICATION_ID, notification);
-        }
-    }
+
 
     private void startLocationTracking() {
         if (checkLocationPermission()) {
@@ -125,25 +117,45 @@ public class ForegroundService extends Service implements LocationListener {
         return result;
     }
 
+    private void sendNotification(String title, String message) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_yasnodom_background)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(2, builder.build()); // Используем другой ID для этого уведомления
+        }
+    }
+
     @Override
     public void onLocationChanged(@NonNull Location location) {
         saveLocation(location);
-        updateNotification(String.format("Обновлено: %.6f, %.6f", location.getLatitude(), location.getLongitude()));
-        Log.d(TAG, String.format("Домашнее : %f, %f",
-                sharedPreferences.getFloat("home_latitude",0.0F),
-                sharedPreferences.getFloat("home_longitude",0.0F)));
+
         float distance = calculateDistance();
-        Log.d(TAG, String.format("Дистанция : %f", distance));
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putFloat("distance", distance);
-        if(distance >= 500.0F) {
-            editor.putBoolean("user_is_home", false);
-            Log.d(TAG, "Пользователь вышел за 100 м от дома");
-        } else {
-            editor.putBoolean("user_is_home", true);
-            Log.d(TAG, "Пользователь в пределах 100 м от дома");
+
+        boolean wasHome = sharedPreferences.getBoolean("user_is_home", true);
+        boolean isHomeNow = distance < 500.0F;
+
+        if (!isHomeNow && wasHome) {
+            // Пользователь только что вышел из дома
+            sendNotification("Вы вышли из дома", "Вы находитесь на расстоянии " + (int) distance + " метров от дома");
+            Log.d(TAG, "Отправлено уведомление: пользователь вышел из дома");
         }
+
+        editor.putBoolean("user_is_home", isHomeNow);
         editor.apply();
+
+        if (isHomeNow) {
+            Log.d(TAG, "Пользователь в пределах 500 м от дома");
+        } else {
+            Log.d(TAG, "Пользователь вышел за 500 м от дома");
+        }
     }
 
     private void saveLocation(Location location) {
