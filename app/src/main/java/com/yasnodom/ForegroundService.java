@@ -44,12 +44,54 @@ public class ForegroundService extends Service implements LocationListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // 1. Сначала создаем канал уведомлений
+        createNotificationChannel();
+
+        // 2. Немедленно показываем уведомление
+        Notification notification = buildNotification("Сервис геолокации активен");
+        startForeground(NOTIFICATION_ID, notification);
+
+        // 3. Затем инициализируем остальные компоненты
         sharedPreferences = getSharedPreferences("YasnoDomStorage", MODE_PRIVATE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         notificationManager = getSystemService(NotificationManager.class);
 
-        createNotificationChannel();
+        // 4. Запускаем отслеживание местоположения
         startLocationTracking();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Сервис геолокации",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Отслеживание вашего местоположения");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    private Notification buildNotification(String text) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("YasnoDom Сервис")
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_yasnodom_background)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .build();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // Обновляем уведомление при перезапуске
+        updateNotification("Сервис продолжает работу");
+        return START_STICKY;
     }
 
 
@@ -178,7 +220,6 @@ public class ForegroundService extends Service implements LocationListener {
             float currentLon = sharedPreferences.getFloat(KEY_LONGITUDE, Float.NaN);
             float homeLat = sharedPreferences.getFloat("home_latitude", Float.NaN);
             float homeLon = sharedPreferences.getFloat("home_longitude", Float.NaN);
-            Log.d(TAG,"СЧИТАЕМ");
             Location currentLoc = new Location("current");
             currentLoc.setLatitude(currentLat);
             currentLoc.setLongitude(currentLon);
@@ -188,41 +229,22 @@ public class ForegroundService extends Service implements LocationListener {
             homeLoc.setLongitude(homeLon);
 
             float distance = currentLoc.distanceTo(homeLoc);
-            Log.d(TAG, String.format("Distance calculation: current(%.6f,%.6f) to home(%.6f,%.6f) = %.2fm",
+            Log.d(TAG, String.format("Дистанция: настоящее местоположение(%.6f,%.6f) до домаЫ(%.6f,%.6f) = %.2fm",
                     currentLat, currentLon, homeLat, homeLon, distance));
             return distance;
         } catch (Exception e) {
-            Log.e(TAG, "Distance calculation error: " + e.getMessage());
+            Log.e(TAG, "Distance calculation eЫrror: " + e.getMessage());
             return Float.POSITIVE_INFINITY;
         }
     }
 
-    private Notification buildNotification(String text) {
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Сервис геолокации YasnoDom")
-                .setContentText(text)
-                .setSmallIcon(R.drawable.ic_yasnodom_background)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
-                .build();
-    }
+
 
     private void updateNotification(String text) {
         notificationManager.notify(NOTIFICATION_ID, buildNotification(text));
     }
 
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Сервис геолокации",
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setDescription("Канал для сервиса отслеживания местоположения");
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
+
 
     private void checkProviders() {
         boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
